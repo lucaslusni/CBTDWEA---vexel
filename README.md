@@ -1,159 +1,96 @@
 🟢 VEXEL – Sistema de Gestão de Veículos e Relatórios
-Frontend (Angular) + Backend (Node.js/Express) + Firebase (Auth & Firestore)
 
-Este repositório contém o sistema VEXEL, uma aplicação completa para gestão de veículos, exibição de relatórios, controle de acesso via Firebase e comunicação entre um backend Express e um frontend Angular com autenticação integrada.
+Frontend Angular + Backend Express + Firebase
 
-📌 Sumário
+O VEXEL é um sistema completo para gestão de veículos, autenticação de usuários e geração de relatórios.
+O projeto é dividido em:
 
-Visão Geral
+Frontend em Angular (tema neon futurista)
 
-Arquitetura Geral
+Backend em Node.js/Express
 
-Requisitos
+Firebase Auth + Firestore para autenticação e persistência
 
-Frontend (Angular)
+📌 Visão Geral da Arquitetura
 
-Como rodar o frontend
+O fluxo da aplicação funciona assim:
 
-Autenticação
+O usuário acessa o frontend Angular
 
-Rotas principais
+Faz login via Firebase Auth
 
-Serviços / API
+O Angular envia requisições para o Express (backend)
 
-UI / Tema
+O backend valida o token no Firebase Admin
 
-Backend (Node.js / Express)
+O backend busca e grava dados no Firestore
 
-Como rodar o backend
-
-Autenticação Firebase
-
-Endpoints
-
-Estrutura de pastas
-
-Integração Front ↔ Back
-
-Dicas de Debug
-
-Boas práticas de versionamento
-
-Licença
-
-🟩 Visão Geral
-
-O VEXEL é um sistema completo composto por:
-
-✔ Frontend em Angular – Interface moderna com tema neon/verde, autenticação e navegação protegida.
-✔ Backend em Node.js/Express – Rotas, lógica de negócio e integração com Firebase Admin (Auth + Firestore).
-✔ Firebase – Autenticação de usuários e banco de dados Firestore para veículos e relatórios.
-
-O objetivo do sistema é oferecer:
-
-CRUD completo de veículos
-
-Métricas e relatórios de uso
-
-Autenticação segura via Firebase
-
-Comunicação via REST API
-
-🏗️ Arquitetura Geral
-[ Angular (Frontend) ]  →  [ Express API ]  →  [ Firebase Admin + Firestore ]
-        |                         |                         |
-    Usuário Web           Regras de Negócio         Autenticação & Dados
-
-🧩 Requisitos
+⚙ Requisitos do Projeto
 Requisitos Globais
 
 Node.js 18+
 
 NPM 9+
 
-Conta Firebase (Auth + Firestore)
+Conta Firebase configurada
+
+Git instalado
 
 Navegador atualizado
 
-Git para versionamento
+Requisitos do Backend
 
-Requisitos Backend
-
-Arquivo serviceAccountKey.json (não versionado!)
+Arquivo serviceAccountKey.json (não deve ser versionado)
 
 Arquivo .env com:
 
 PORT=3001
+
 GOOGLE_APPLICATION_CREDENTIALS=./serviceAccountKey.json
 
-Requisitos Frontend
+Requisitos do Frontend
 
-Angular CLI (recomendado):
+Angular CLI (opcional, mas recomendado)
 
-npm install -g @angular/cli
-
-🖥️ Frontend (Angular)
+🧩 FRONTEND – Angular
 🚀 Como rodar o frontend
 
-Instale as dependências:
-
+Instale as dependências
 npm install
 
-
-Rode em modo desenvolvimento:
-
+Inicie o servidor de desenvolvimento
 npm start
 
-
-Aplicação ficará disponível em:
-
+Acesse o navegador em:
 http://localhost:4200
 
-
-Configure a URL da API em:
-
+Configure a URL da API em
 src/environments/environment.ts
-
-
-Exemplo:
-
-apiUrl: "http://localhost:3001"
+(campo apiUrl)
 
 🔐 Autenticação
 
-O frontend utiliza Firebase Auth (email/senha).
+Autenticação via Firebase Auth (email/senha)
 
-Rota de login: /login
+Login em /login
 
-Token JWT é obtido via Firebase
-
-Interceptor:
-
-auth-token.interceptor.ts
-
-injeta automaticamente:
-
+Interceptor adiciona automaticamente:
 Authorization: Bearer <ID_TOKEN>
 
-Proteção de rotas
+auth.guard.ts protege rotas privadas e aguarda reidratação do usuário
 
-auth.guard.ts protege rotas como:
+🧭 Rotas Principais
 
-/vehicles
+/login – Tela de login
 
-/reports
+/vehicles – CRUD de veículos
 
-O guard aguarda a reidratação do usuário via Firebase antes de liberar o acesso.
+/reports – Dashboard de relatórios
 
-🧭 Rotas principais
-Rota	Descrição
-/login	Tela de login
-/vehicles	CRUD de veículos (lista, cria, edita, remove)
-/reports	Dashboard com métricas resumidas
-📡 Serviços / API
-vehicles.service.ts
+📡 Serviços / Chamadas de API
+VehiclesService
 
-list({ page, pageSize, status, brand })
+list()
 
 get(id)
 
@@ -163,167 +100,126 @@ update(id, payload)
 
 remove(id)
 
-reports.service.ts
+ReportsService
 
-summary() – retorna métricas de uso dos veículos.
+summary() – Obtém métrica geral de veículos e relatórios
 
 🎨 UI / Tema
 
-Tema neon verde futurista, com:
+Tema neon/verdes futuristas
 
-gradientes
+SCSS modular
 
-cartões translúcidos
+Botões com efeito glow
 
-botões estilizados
+Cards translúcidos
 
-SCSS modular por página
+Variáveis no topo dos SCSS para customização rápida
 
-Variáveis do tema podem ser ajustadas diretamente no topo dos .scss.
-
-🔥 Backend (Node.js / Express)
+🔥 BACKEND – Node.js / Express
 🚀 Como rodar o backend
 
-Instalar dependências:
-
+Instale dependências
 npm install
 
-
-Criar .env baseado em .env.example:
+Crie seu .env baseado no .env.example
 
 PORT=3001
+
 GOOGLE_APPLICATION_CREDENTIALS=./serviceAccountKey.json
 
+Adicione sua chave Firebase (serviceAccountKey.json)
 
-Adicionar chave privada do Firebase:
-
-Firebase Console → Configurações do Projeto
-→ Contas de Serviço
-→ Gerar nova chave privada
-
-Rodar em desenvolvimento:
-
+Execute em desenvolvimento
 npm run dev
 
-
-Produção:
-
+Execute em produção
 npm start
 
-
-API padrão:
-
+API disponível em:
 http://localhost:3001
 
 🔐 Autenticação Firebase Admin
 
-O backend valida o header:
+Todo acesso às rotas protegidas deve enviar:
 
 Authorization: Bearer <ID_TOKEN>
 
-
-O auth.js usa Firebase Admin para verificar tokens e liberar acesso restrito.
+O backend valida esse token via Firebase Admin SDK.
 
 📚 Endpoints da API
-▶ Health
+Saúde
 
 GET /health
-Verifica se o servidor está ativo.
 
-▶ Relatórios
-Sem autenticação (teste)
+Relatórios
 
-GET /reports/public/summary
+GET /reports/public/summary (sem auth)
 
-Com autenticação
+GET /reports/summary (com auth)
 
-GET /reports/summary
-Retorna:
+Veículos (todas exigem autenticação)
 
-total de veículos
+GET /vehicles (listagem com filtros e paginação)
 
-ativos
+GET /vehicles/:id
 
-médias
-
-min/max de anos
-
-cálculo automático de eficiência
-
-▶ Veículos (todas exigem Auth)
-Listar (com paginação)
-GET /vehicles?page=1&pageSize=10&status=active&brand=Ford
-
-Criar
 POST /vehicles
-{
-  "plate": "ABC1D23",
-  "model": "Onix",
-  "brand": "Chevrolet",
-  "year": 2020,
-  "status": "active",
-  "mileage": 35120
-}
 
-Atualizar
 PUT /vehicles/:id
 
-Remover
 DELETE /vehicles/:id
 
-Check-up
 GET /vehicles/check-up/all
 
-Eficiência
 GET /vehicles/efficiency/all
 
-🗂️ Estrutura do Backend
-src/
- ├─ app.js               # Bootstrap Express
- ├─ server.js            # Inicia servidor
- ├─ lib/firebase.js      # Config Firebase Admin
- ├─ middlewares/
- │   └─ auth.js          # Validação de tokens
- ├─ routes/
- │   ├─ vehicles.routes.js
- │   └─ reports.routes.js
- ├─ controllers/
- │   ├─ vehicles.controller.js
- │   └─ reports.controller.js
- └─ ...
+🗂 Estrutura do Backend
 
-🔄 Integração Front ↔ Back
+app.js – Configuração do Express
 
-O Angular chama o backend usando HttpClient.
+server.js – Inicialização do servidor
 
-Todas as chamadas recebem automaticamente o token JWT via interceptor.
+lib/firebase.js – Configuração Firebase Admin
 
-O backend valida tudo com Firebase Admin.
+middlewares/auth.js – Validação de token
 
-O Firestore é usado como base de dados principal.
+routes/ – Rotas (vehicles e reports)
 
-🛠️ Dicas de Debug
+controllers/ – Regras de negócio
+
+🔄 Integração Frontend ↔ Backend
+
+O Angular envia requests ao backend via HttpClient
+
+Interceptor injeta o Bearer Token automaticamente
+
+Backend valida no Firebase
+
+Firestore guarda e retorna dados
+
+🛠 Dicas de Debug
 Frontend
 
-DevTools → Network para checar requests
+Use DevTools > Network para ver requisições
 
-401/403 → refazer login
+401/403: refazer login
 
-404 → conferir apiUrl
+404: revisar apiUrl
 
-500 → backend quebrando
+500: erro no backend
 
 Backend
 
-Logs do console
+Conferir logs do terminal
 
-Verificar .env e serviceAccountKey.json
+Verificar configuração de .env
 
-Checar erros do Firebase Admin
+Validar chave Firebase
 
-🚫 Boas práticas de versionamento
+🧼 Boas Práticas de Versionamento
 
-NUNCA versionar:
+Nunca versionar:
 
 node_modules
 
@@ -331,10 +227,12 @@ node_modules
 
 serviceAccountKey.json
 
-arquivos de build (dist, out, build)
+dist/ ou build/
 
-Use um .gitignore adequado (posso gerar um pra você se quiser).
+arquivos de log
+
+Use um .gitignore adequado.
 
 📄 Licença
 
-Projeto interno. Define a licença conforme sua necessidade.
+Define conforme necessidade do projeto.
