@@ -1,0 +1,146 @@
+:host {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(0, 255, 140, 0.08), rgba(0, 0, 0, 0) 20%),
+    radial-gradient(circle at 80% 0%, rgba(0, 200, 255, 0.08), rgba(0, 0, 0, 0) 18%),
+    linear-gradient(135deg, #0f1619 0%, #081f14 50%, #04150d 100%);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #d9f2e6;
+  padding: 20px;
+}
+
+.login-form {
+  width: min(420px, 100%);
+  padding: 28px;
+  border-radius: 16px;
+  background: rgba(12, 26, 20, 0.85);
+  border: 1px solid rgba(0, 255, 140, 0.22);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 230, 118, 0.05);
+  backdrop-filter: blur(8px);
+}
+
+.brand-badge {
+  width: fit-content;
+  margin: 0 auto 12px auto;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #00e676, #00b248);
+  color: #04130b;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  box-shadow: 0 8px 22px rgba(0, 230, 118, 0.28);
+}
+
+h2 {
+  margin: 0 0 18px;
+  color: #18ff86;
+  text-align: center;
+  letter-spacing: 0.6px;
+  text-shadow: 0 0 12px rgba(0, 230, 118, 0.4);
+}
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  color: #7cc8a4;
+  font-weight: 600;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 255, 140, 0.22);
+  background: rgba(255, 255, 255, 0.02);
+  color: #d9f2e6;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #00e676;
+  box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.16);
+}
+
+.invalid small {
+  color: #ff6b6b;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  color: #7cc8a4;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.forgot {
+  color: #18ff86;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot:hover {
+  text-decoration: underline;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #00e676, #00b248);
+  color: #04130b;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(0, 230, 118, 0.35);
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px rgba(0, 230, 118, 0.45);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.server-error {
+  color: #ff6b6b;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.signup {
+  margin-top: 16px;
+  text-align: center;
+  color: #7cc8a4;
+}
+
+.signup a {
+  color: #18ff86;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.signup a:hover {
+  text-decoration: underline;
+}

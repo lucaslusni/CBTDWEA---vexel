@@ -1,0 +1,38 @@
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+    <div class="brand-badge">VEXEL</div>
+    <h2>Entrar</h2>
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" class="form-control" placeholder="seu@exemplo.com" />
+        <div class="invalid" *ngIf="email.invalid && (email.dirty || email.touched)">
+            <small *ngIf="email.errors?.['required']">Email é obrigatório.</small>
+            <small *ngIf="email.errors?.['email']">Email inválido.</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="password">Senha</label>
+        <input id="password" type="password" formControlName="password" class="form-control" placeholder="Senha" />
+        <div class="invalid" *ngIf="password.invalid && (password.dirty || password.touched)">
+            <small *ngIf="password.errors?.['required']">Senha é obrigatória.</small>
+            <small *ngIf="password.errors?.['minlength']">Mínimo 6 caracteres.</small>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label class="checkbox">
+      <input type="checkbox" formControlName="remember" /> Lembrar-me
+    </label>
+        <a class="forgot" routerLink="/auth/forgot">Esqueceu a senha?</a>
+    </div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid || loading">
+    {{ loading ? 'Entrando...' : 'Entrar' }}
+  </button>
+
+    <div class="server-error" *ngIf="error">{{ error }}</div>
+    <div class="server-error" *ngIf="authError">{{ authError }}</div>
+
+    <p class="signup">Não tem conta? <a routerLink="/auth/register">Registre-se</a></p>
+</form>

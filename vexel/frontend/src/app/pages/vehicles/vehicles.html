@@ -1,0 +1,99 @@
+<section class="page">
+  <div class="page-head">
+    <div class="brand-badge">VEXEL</div>
+    <h2>Veículos</h2>
+  </div>
+
+  <p class="error" *ngIf="error">{{ error }}</p>
+  <p class="success" *ngIf="success">{{ success }}</p>
+  <p *ngIf="loading">Carregando veículos...</p>
+
+  <form [formGroup]="createForm" (ngSubmit)="onCreate()" class="card">
+    <h3>Novo veículo</h3>
+    <div class="grid">
+      <label>Placa <input formControlName="plate" /></label>
+      <label>Modelo <input formControlName="model" /></label>
+      <label>Marca <input formControlName="brand" /></label>
+      <label>Ano <input type="number" formControlName="year" /></label>
+      <label>Status
+        <select formControlName="status">
+          <option value="active">Ativo</option>
+          <option value="inactive">Inativo</option>
+        </select>
+      </label>
+      <label>Km
+        <input type="number" formControlName="mileage" />
+      </label>
+    </div>
+    <div class="form-actions">
+      <button type="submit" [disabled]="createForm.invalid || createLoading">
+        {{ createLoading ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </form>
+
+  <div *ngIf="!loading && vehicles.length === 0">
+    Nenhum veículo encontrado.
+  </div>
+
+  <table *ngIf="!loading && vehicles.length" class="table">
+    <thead>
+      <tr>
+        <th>Placa</th>
+        <th>Modelo</th>
+        <th>Marca</th>
+        <th>Ano</th>
+        <th>Status</th>
+        <th>Km</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let v of vehicles">
+        <td>{{ v.plate }}</td>
+        <td *ngIf="editingId !== v.id">{{ v.model }}</td>
+        <td *ngIf="editingId === v.id"><input [formControl]="editForm.controls.model" /></td>
+
+        <td *ngIf="editingId !== v.id">{{ v.brand }}</td>
+        <td *ngIf="editingId === v.id"><input [formControl]="editForm.controls.brand" /></td>
+
+        <td *ngIf="editingId !== v.id">{{ v.year }}</td>
+        <td *ngIf="editingId === v.id"><input type="number" [formControl]="editForm.controls.year" /></td>
+
+        <td *ngIf="editingId !== v.id">
+          <span class="status-pill" [class.inactive]="v.status !== 'active'">{{ v.status || '—' }}</span>
+        </td>
+        <td *ngIf="editingId === v.id">
+          <select [formControl]="editForm.controls.status">
+            <option value="active">Ativo</option>
+            <option value="inactive">Inativo</option>
+          </select>
+        </td>
+
+        <td *ngIf="editingId !== v.id">{{ v.mileage }}</td>
+        <td *ngIf="editingId === v.id"><input type="number" [formControl]="editForm.controls.mileage" /></td>
+
+        <td>
+          <ng-container *ngIf="editingId === v.id; else viewActions">
+            <button (click)="saveEdit(v.id)" [disabled]="editForm.invalid || editLoading">
+              {{ editLoading ? 'Salvando...' : 'Salvar' }}
+            </button>
+            <button type="button" (click)="cancelEdit()">Cancelar</button>
+          </ng-container>
+          <ng-template #viewActions>
+            <button type="button" (click)="startEdit(v)">Editar</button>
+            <button type="button" (click)="delete(v.id)" [disabled]="deletingId === v.id">
+              {{ deletingId === v.id ? 'Excluindo...' : 'Excluir' }}
+            </button>
+          </ng-template>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="pagination" *ngIf="total > pageSize">
+    <button type="button" (click)="changePage(-1)" [disabled]="page === 1">Anterior</button>
+    <span class="muted">Página {{ page }}</span>
+    <button type="button" (click)="changePage(1)" [disabled]="vehicles.length < pageSize">Próxima</button>
+  </div>
+</section>

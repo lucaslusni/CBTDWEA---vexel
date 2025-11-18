@@ -1,0 +1,23 @@
+<header class="topbar">
+  <div class="brand">
+    <span class="badge">VEXEL</span>
+    <span class="name">Painel</span>
+  </div>
+
+  <nav class="links">
+    <a routerLink="/vehicles" routerLinkActive="active">Veículos</a>
+    <a routerLink="/reports" routerLinkActive="active">Relatórios</a>
+  </nav>
+
+  <div class="user" *ngIf="user$ | async as user; else loginLink">
+    <span class="email">{{ user.email || 'Conectado' }}</span>
+    <button type="button" (click)="logout()">Sair</button>
+  </div>
+  <ng-template #loginLink>
+    <a class="login" routerLink="/login">Login</a>
+  </ng-template>
+</header>
+
+<main class="shell">
+  <router-outlet></router-outlet>
+</main>
