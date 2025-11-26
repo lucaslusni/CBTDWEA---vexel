@@ -1,5 +1,6 @@
 import { db } from "../lib/firebase.js";
 import { z } from "zod";
+import { Vehicle } from "../models/vehicle.js";
 
 const col = db.collection("vehicles");
 
@@ -24,25 +25,19 @@ export const list = async (req, res) => {
   const brand = req.query.brand ? String(req.query.brand).trim() : null;
 
   try {
-    // Estratégia simples: buscar ordenado por placa e filtrar em memória (volume pequeno)
     const snap = await col.orderBy("plate").get();
-    let data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    let data = snap.docs.map(d => Vehicle.fromPlain({ id: d.id, ...d.data() }));
 
-    if (status) data = data.filter(d => d.status === status);
-    if (brand) data = data.filter(d => d.brand === brand);
+    if (status) data = data.filter(v => v.status === status);
+    if (brand) data = data.filter(v => v.brand === brand);
 
     const start = (page - 1) * pageSize;
-    const items = data.slice(start, start + pageSize);
+    const items = data.slice(start, start + pageSize).map(v => v.toPlain());
 
-    res.json({
-      page,
-      pageSize,
-      count: data.length,
-      items
-    });
+    res.json({ page, pageSize, count: data.length, items });
   } catch (err) {
     console.error("list:", err);
-    res.status(503).json({ message: "Firestore indisponivel", detail: err?.message });
+    res.status(503).json({ message: "Firestore indisponivel", detail: err && err.message });
   }
 };
 
@@ -51,7 +46,8 @@ export const getById = async (req, res) => {
     const ref = col.doc(req.params.id);
     const doc = await ref.get();
     if (!doc.exists) return res.status(404).json({ message: "Veiculo nao encontrado" });
-    res.json({ id: doc.id, ...doc.data() });
+    const vehicle = Vehicle.fromPlain({ id: doc.id, ...doc.data() });
+    res.json(vehicle.toPlain());
   } catch (err) {
     console.error("getById:", err);
     res.status(503).json({ message: "Firestore indisponivel" });
@@ -66,9 +62,9 @@ export const create = async (req, res) => {
     const exists = await ref.get();
     if (exists.exists) return res.status(409).json({ message: "Placa ja cadastrada" });
 
-    await ref.set({ ...data, updatedAt: new Date().toISOString() });
-    const created = await ref.get();
-    res.status(201).json({ id: created.id, ...created.data() });
+    const vehicle = Vehicle.fromPlain({ ...data, id: data.plate, updatedAt: new Date().toISOString() });
+    await ref.set(vehicle.toPlain(false));
+    res.status(201).json(vehicle.toPlain());
   } catch (err) {
     if (err instanceof z.ZodError) {
       return res.status(400).json({ message: "Payload invalido", issues: err.issues });
@@ -84,11 +80,12 @@ export const update = async (req, res) => {
     const doc = await ref.get();
     if (!doc.exists) return res.status(404).json({ message: "Veiculo nao encontrado" });
 
+    const current = Vehicle.fromPlain({ id: doc.id, ...doc.data() });
     const patch = sanitizeUpdate(req.body);
-    await ref.update({ ...patch, updatedAt: new Date().toISOString() });
+    const updated = current.withPatch(patch);
 
-    const updated = await ref.get();
-    res.json({ id: updated.id, ...updated.data() });
+    await ref.set(updated.toPlain(false));
+    res.json(updated.toPlain());
   } catch (err) {
     if (err instanceof z.ZodError) {
       return res.status(400).json({ message: "Payload invalido", issues: err.issues });
@@ -114,20 +111,19 @@ export const remove = async (req, res) => {
 export const checkUp = async (_req, res) => {
   try {
     const snap = await col.get();
-    const vehicles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const vehicles = snap.docs.map(d => Vehicle.fromPlain({ id: d.id, ...d.data() }));
 
     const hoje = new Date();
     const alertas = vehicles.filter(v => {
       const ano = v.year || hoje.getFullYear();
       const idade = hoje.getFullYear() - ano;
-      const precisaRevisao = (v.mileage ?? 0) > 10000 || idade >= 1;
-      return precisaRevisao;
+      return (v.mileage ?? 0) > 10000 || idade >= 1;
     });
 
     res.json({
       total: vehicles.length,
       precisandoRevisao: alertas.length,
-      veiculos: alertas
+      veiculos: alertas.map(v => v.toPlain())
     });
   } catch (err) {
     console.error("checkUp:", err);
@@ -138,14 +134,14 @@ export const checkUp = async (_req, res) => {
 export const efficiency = async (_req, res) => {
   try {
     const snap = await col.get();
-    const vehicles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const vehicles = snap.docs.map(d => Vehicle.fromPlain({ id: d.id, ...d.data() }));
 
     const data = vehicles.map(v => {
       const km = v.mileage ?? 0;
-      const litros = km / 10 + Math.random() * 50; // simula historico
+      const litros = km / 10 + Math.random() * 50;
       const consumo = km / litros;
       return {
-        ...v,
+        ...v.toPlain(),
         consumoMedio: consumo.toFixed(2),
         alerta: consumo < 8 ? "baixo consumo" : null
       };

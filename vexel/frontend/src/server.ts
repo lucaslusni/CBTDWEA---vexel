@@ -1,4 +1,5 @@
-import 'zone.js/node'; // zone para execução no Node (SSR)
+import 'zone.js/node'; // Importa o Zone.js para ambiente Node (necessário para SSR do Angular)
+
 import {
   AngularNodeAppEngine,
   createNodeRequestHandler,
@@ -8,25 +9,29 @@ import {
 import express from 'express';
 import { join } from 'node:path';
 
+// Caminho da pasta de build do frontend (versão browser gerada pelo Angular)
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
-const app = express();
-const angularApp = new AngularNodeAppEngine();
+const app = express(); // Cria instância do servidor Express
+const angularApp = new AngularNodeAppEngine(); // Engine que sabe renderizar a app Angular no servidor
 
 /**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
+ * Aqui é o lugar para definir endpoints REST da sua API dentro do mesmo servidor Express (se você quiser).
+ * Por padrão está só como exemplo/comentado.
  *
- * Example:
+ * Exemplo:
  * ```ts
  * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
+ *   // Tratar requisição de API
  * });
  * ```
  */
 
 /**
- * Serve static files from /browser
+ * Serve arquivos estáticos gerados no build (HTML, JS, CSS, imagens, etc) a partir da pasta /browser.
+ * - maxAge: '1y' -> permite cache de até 1 ano no cliente/CDN
+ * - index: false -> não serve automaticamente index.html
+ * - redirect: false -> não faz redirecionamento automático
  */
 app.use(
   express.static(browserDistFolder, {
@@ -37,20 +42,26 @@ app.use(
 );
 
 /**
- * Handle all other requests by rendering the Angular application.
+ * Para qualquer outra rota que não foi atendida pelos estáticos/endpoints acima,
+ * o Express delega para o Angular fazer a renderização server-side (SSR).
  */
 app.use((req, res, next) => {
   angularApp
-    .handle(req)
+    .handle(req) // AngularNodeAppEngine processa a requisição
     .then((response) =>
+      // Se o Angular devolveu uma resposta SSR, escreve ela na response do Node;
+      // senão, chama next() para outros middlewares/rotas
       response ? writeResponseToNodeResponse(response, res) : next(),
     )
-    .catch(next);
+    .catch(next); // Em caso de erro, passa para o handler de erro padrão do Express
 });
 
 /**
- * Start the server if this module is the main entry point, or it is ran via PM2.
- * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
+ * Sobe o servidor Express se:
+ * - este módulo for o módulo principal (executado diretamente), OU
+ * - estiver sendo executado via PM2 (process manager)
+ *
+ * Usa a porta definida na env `PORT`, ou 4000 como padrão.
  */
 if (isMainModule(import.meta.url) || process.env['pm_id']) {
   const port = process.env['PORT'] || 4000;
@@ -64,6 +75,8 @@ if (isMainModule(import.meta.url) || process.env['pm_id']) {
 }
 
 /**
- * Request handler used by the Angular CLI (for dev-server and during build) or Firebase Cloud Functions.
+ * Exporta um request handler pronto para ser usado:
+ * - pelo Angular CLI (dev-server, build)
+ * - ou por plataformas como Firebase Cloud Functions / Cloud Run, etc.
  */
 export const reqHandler = createNodeRequestHandler(app);

@@ -1,23 +1,43 @@
+<!-- Barra superior fixa do painel -->
 <header class="topbar">
-  <div class="brand">
-    <span class="badge">VEXEL</span>
-    <span class="name">Painel</span>
-  </div>
+    <!-- Branding do sistema (logo + nome da aplicação) -->
+    <div class="brand">
+        <!-- Badge com o nome do sistema -->
+        <span class="badge">VEXEL</span>
+        <!-- Nome/descrição do painel -->
+        <span class="name">Painel</span>
+    </div>
 
-  <nav class="links">
-    <a routerLink="/vehicles" routerLinkActive="active">Veículos</a>
-    <a routerLink="/reports" routerLinkActive="active">Relatórios</a>
-  </nav>
+    <!-- Navegação principal entre páginas protegidas -->
+    <nav class="links">
+        <!-- Link para a tela de veículos -->
+        <!-- routerLinkActive="active" adiciona a classe .active quando a rota está ativa -->
+        <a routerLink="/vehicles" routerLinkActive="active">Veículos</a>
 
-  <div class="user" *ngIf="user$ | async as user; else loginLink">
-    <span class="email">{{ user.email || 'Conectado' }}</span>
-    <button type="button" (click)="logout()">Sair</button>
-  </div>
-  <ng-template #loginLink>
-    <a class="login" routerLink="/login">Login</a>
-  </ng-template>
+        <!-- Link para a tela de relatórios -->
+        <a routerLink="/reports" routerLinkActive="active">Relatórios</a>
+    </nav>
+
+    <!-- Bloco do usuário logado -->
+    <!-- Usa async pipe para consumir o observable user$ vindo do componente -->
+    <!-- Se existir usuário, mostra email + botão de sair; se não, usa o template #loginLink -->
+    <div class="user" *ngIf="user$ | async as user; else loginLink">
+        <!-- Exibe o email do usuário ou "Conectado" como fallback -->
+        <span class="email">{{ user.email || 'Conectado' }}</span>
+
+        <!-- Botão que dispara o método logout() no componente -->
+        <button type="button" (click)="logout()">Sair</button>
+    </div>
+
+    <!-- Template mostrado quando NÃO há usuário logado -->
+    <ng-template #loginLink>
+        <!-- Link simples para rota de login -->
+        <a class="login" routerLink="/login">Login</a>
+    </ng-template>
 </header>
 
+<!-- Conteúdo principal da aplicação -->
 <main class="shell">
-  <router-outlet></router-outlet>
+    <!-- Saída das rotas; as páginas (Vehicles, Reports, Login, etc.) vão ser renderizadas aqui -->
+    <router-outlet></router-outlet>
 </main>

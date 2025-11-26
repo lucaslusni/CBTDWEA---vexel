@@ -1,99 +1,178 @@
 <section class="page">
-  <div class="page-head">
-    <div class="brand-badge">VEXEL</div>
-    <h2>Veículos</h2>
-  </div>
+    <!-- Cabeçalho da página de veículos -->
+    <div class="page-head">
+        <!-- Badge/“logo” da aplicação -->
+        <div class="brand-badge">VEXEL</div>
+        <h2>Veículos</h2>
+    </div>
 
-  <p class="error" *ngIf="error">{{ error }}</p>
-  <p class="success" *ngIf="success">{{ success }}</p>
-  <p *ngIf="loading">Carregando veículos...</p>
+    <!-- Mensagens de erro e sucesso globais -->
+    <p class="error" *ngIf="error">{{ error }}</p>
+    <p class="success" *ngIf="success">{{ success }}</p>
 
-  <form [formGroup]="createForm" (ngSubmit)="onCreate()" class="card">
-    <h3>Novo veículo</h3>
-    <div class="grid">
-      <label>Placa <input formControlName="plate" /></label>
-      <label>Modelo <input formControlName="model" /></label>
-      <label>Marca <input formControlName="brand" /></label>
-      <label>Ano <input type="number" formControlName="year" /></label>
-      <label>Status
+    <!-- Indicador simples de carregamento da lista -->
+    <p *ngIf="loading">Carregando veículos...</p>
+
+    <!-- Formulário de criação de novo veículo -->
+    <form [formGroup]="createForm" (ngSubmit)="onCreate()" class="card">
+        <h3>Novo veículo</h3>
+
+        <!-- Grid com os campos do form reativo -->
+        <div class="grid">
+            <!-- Campo: Placa (usa formControlName=plate) -->
+            <label>
+        Placa
+        <input formControlName="plate" />
+      </label>
+
+            <!-- Campo: Modelo -->
+            <label>
+        Modelo
+        <input formControlName="model" />
+      </label>
+
+            <!-- Campo: Marca -->
+            <label>
+        Marca
+        <input formControlName="brand" />
+      </label>
+
+            <!-- Campo: Ano (numérico) -->
+            <label>
+        Ano
+        <input type="number" formControlName="year" />
+      </label>
+
+            <!-- Campo: Status (select ativo/inativo) -->
+            <label>
+        Status
         <select formControlName="status">
           <option value="active">Ativo</option>
           <option value="inactive">Inativo</option>
         </select>
       </label>
-      <label>Km
+
+            <!-- Campo: Quilometragem (numérico) -->
+            <label>
+        Km
         <input type="number" formControlName="mileage" />
       </label>
-    </div>
-    <div class="form-actions">
-      <button type="submit" [disabled]="createForm.invalid || createLoading">
+        </div>
+
+        <!-- Ações do formulário de criação -->
+        <div class="form-actions">
+            <!-- Botão de submit, desabilitado se o form for inválido ou estiver salvando -->
+            <button type="submit" [disabled]="createForm.invalid || createLoading">
         {{ createLoading ? 'Salvando...' : 'Salvar' }}
       </button>
+        </div>
+    </form>
+
+    <!-- Mensagem quando não há veículos retornados e não está carregando -->
+    <div *ngIf="!loading && vehicles.length === 0">
+        Nenhum veículo encontrado.
     </div>
-  </form>
 
-  <div *ngIf="!loading && vehicles.length === 0">
-    Nenhum veículo encontrado.
-  </div>
+    <!-- Tabela de veículos (só mostra se tiver itens e não estiver carregando) -->
+    <table *ngIf="!loading && vehicles.length" class="table">
+        <thead>
+            <tr>
+                <th>Placa</th>
+                <th>Modelo</th>
+                <th>Marca</th>
+                <th>Ano</th>
+                <th>Status</th>
+                <th>Km</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Loop pelos veículos -->
+            <tr *ngFor="let v of vehicles">
+                <!-- Placa sempre em modo “visualização” (não editável aqui) -->
+                <td>{{ v.plate }}</td>
 
-  <table *ngIf="!loading && vehicles.length" class="table">
-    <thead>
-      <tr>
-        <th>Placa</th>
-        <th>Modelo</th>
-        <th>Marca</th>
-        <th>Ano</th>
-        <th>Status</th>
-        <th>Km</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let v of vehicles">
-        <td>{{ v.plate }}</td>
-        <td *ngIf="editingId !== v.id">{{ v.model }}</td>
-        <td *ngIf="editingId === v.id"><input [formControl]="editForm.controls.model" /></td>
+                <!-- MODELO: alterna entre texto e input conforme o veículo está ou não em edição -->
+                <td *ngIf="editingId !== v.id">
+                    {{ v.model }}
+                </td>
+                <td *ngIf="editingId === v.id">
+                    <input [formControl]="editForm.controls.model" />
+                </td>
 
-        <td *ngIf="editingId !== v.id">{{ v.brand }}</td>
-        <td *ngIf="editingId === v.id"><input [formControl]="editForm.controls.brand" /></td>
+                <!-- MARCA: texto ou input, de acordo com o modo edição -->
+                <td *ngIf="editingId !== v.id">
+                    {{ v.brand }}
+                </td>
+                <td *ngIf="editingId === v.id">
+                    <input [formControl]="editForm.controls.brand" />
+                </td>
 
-        <td *ngIf="editingId !== v.id">{{ v.year }}</td>
-        <td *ngIf="editingId === v.id"><input type="number" [formControl]="editForm.controls.year" /></td>
+                <!-- ANO: texto ou input numérico -->
+                <td *ngIf="editingId !== v.id">
+                    {{ v.year }}
+                </td>
+                <td *ngIf="editingId === v.id">
+                    <input type="number" [formControl]="editForm.controls.year" />
+                </td>
 
-        <td *ngIf="editingId !== v.id">
-          <span class="status-pill" [class.inactive]="v.status !== 'active'">{{ v.status || '—' }}</span>
-        </td>
-        <td *ngIf="editingId === v.id">
-          <select [formControl]="editForm.controls.status">
+                <!-- STATUS: pill em modo visualização, select em modo edição -->
+                <td *ngIf="editingId !== v.id">
+                    <span class="status-pill" [class.inactive]="v.status !== 'active'">
+            {{ v.status || '—' }}
+          </span>
+                </td>
+                <td *ngIf="editingId === v.id">
+                    <select [formControl]="editForm.controls.status">
             <option value="active">Ativo</option>
             <option value="inactive">Inativo</option>
           </select>
-        </td>
+                </td>
 
-        <td *ngIf="editingId !== v.id">{{ v.mileage }}</td>
-        <td *ngIf="editingId === v.id"><input type="number" [formControl]="editForm.controls.mileage" /></td>
+                <!-- KM: texto ou input numérico -->
+                <td *ngIf="editingId !== v.id">
+                    {{ v.mileage }}
+                </td>
+                <td *ngIf="editingId === v.id">
+                    <input type="number" [formControl]="editForm.controls.mileage" />
+                </td>
 
-        <td>
-          <ng-container *ngIf="editingId === v.id; else viewActions">
-            <button (click)="saveEdit(v.id)" [disabled]="editForm.invalid || editLoading">
+                <!-- Coluna de ações: muda conforme o veículo está ou não em modo edição -->
+                <td>
+                    <!-- Quando está em edição, mostra botões de salvar/cancelar -->
+                    <ng-container *ngIf="editingId === v.id; else viewActions">
+                        <button (click)="saveEdit(v.id)" [disabled]="editForm.invalid || editLoading">
               {{ editLoading ? 'Salvando...' : 'Salvar' }}
             </button>
-            <button type="button" (click)="cancelEdit()">Cancelar</button>
-          </ng-container>
-          <ng-template #viewActions>
-            <button type="button" (click)="startEdit(v)">Editar</button>
-            <button type="button" (click)="delete(v.id)" [disabled]="deletingId === v.id">
+                        <button type="button" (click)="cancelEdit()">
+              Cancelar
+            </button>
+                    </ng-container>
+
+                    <!-- Quando NÃO está em edição, mostra botões de editar/excluir -->
+                    <ng-template #viewActions>
+                        <button type="button" (click)="startEdit(v)">
+              Editar
+            </button>
+                        <button type="button" (click)="delete(v.id)" [disabled]="deletingId === v.id">
               {{ deletingId === v.id ? 'Excluindo...' : 'Excluir' }}
             </button>
-          </ng-template>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+                    </ng-template>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
-  <div class="pagination" *ngIf="total > pageSize">
-    <button type="button" (click)="changePage(-1)" [disabled]="page === 1">Anterior</button>
-    <span class="muted">Página {{ page }}</span>
-    <button type="button" (click)="changePage(1)" [disabled]="vehicles.length < pageSize">Próxima</button>
-  </div>
+    <!-- Controles de paginação -->
+    <div class="pagination" *ngIf="total > pageSize">
+        <button type="button" (click)="changePage(-1)" [disabled]="page === 1">
+      Anterior
+    </button>
+
+        <span class="muted">Página {{ page }}</span>
+
+        <button type="button" (click)="changePage(1)" [disabled]="vehicles.length < pageSize">
+      Próxima
+    </button>
+    </div>
 </section>

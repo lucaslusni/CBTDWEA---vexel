@@ -1,38 +1,55 @@
+<!-- Formulário reativo ligado ao FormGroup "loginForm".
+     (ngSubmit) chama o método onSubmit() do componente ao enviar o formulário. -->
 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+    <!-- Logo / identificação da aplicação -->
     <div class="brand-badge">VEXEL</div>
     <h2>Entrar</h2>
 
+    <!-- Campo de email -->
     <div class="form-group">
         <label for="email">Email</label>
+        <!-- formControlName conecta o input ao control "email" no FormGroup -->
         <input id="email" type="email" formControlName="email" class="form-control" placeholder="seu@exemplo.com" />
+        <!-- Exibe mensagens de erro se o campo for inválido e já tiver sido tocado/alterado -->
         <div class="invalid" *ngIf="email.invalid && (email.dirty || email.touched)">
             <small *ngIf="email.errors?.['required']">Email é obrigatório.</small>
             <small *ngIf="email.errors?.['email']">Email inválido.</small>
         </div>
     </div>
 
+    <!-- Campo de senha -->
     <div class="form-group">
         <label for="password">Senha</label>
+        <!-- formControlName conecta o input ao control "password" -->
         <input id="password" type="password" formControlName="password" class="form-control" placeholder="Senha" />
+        <!-- Mensagens de validação da senha -->
         <div class="invalid" *ngIf="password.invalid && (password.dirty || password.touched)">
             <small *ngIf="password.errors?.['required']">Senha é obrigatória.</small>
             <small *ngIf="password.errors?.['minlength']">Mínimo 6 caracteres.</small>
         </div>
     </div>
 
+    <!-- Linha com checkbox "Lembrar-me" e link de "Esqueceu a senha?" -->
     <div class="form-row">
+        <!-- Checkbox ligado ao control "remember" -->
         <label class="checkbox">
       <input type="checkbox" formControlName="remember" /> Lembrar-me
     </label>
+        <!-- Navega para a rota de recuperação de senha -->
         <a class="forgot" routerLink="/auth/forgot">Esqueceu a senha?</a>
     </div>
 
+    <!-- Botão de submit. Fica desabilitado se o formulário for inválido ou se estiver carregando -->
     <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid || loading">
     {{ loading ? 'Entrando...' : 'Entrar' }}
   </button>
 
+    <!-- Exibição de erros vindos do servidor ou da autenticação -->
     <div class="server-error" *ngIf="error">{{ error }}</div>
     <div class="server-error" *ngIf="authError">{{ authError }}</div>
 
-    <p class="signup">Não tem conta? <a routerLink="/auth/register">Registre-se</a></p>
+    <!-- Link para a tela de registro -->
+    <p class="signup">
+        Não tem conta? <a routerLink="/auth/register">Registre-se</a>
+    </p>
 </form>
