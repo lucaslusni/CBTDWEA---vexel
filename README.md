@@ -1,141 +1,70 @@
-# VEXEL – Sistema de Gestão de Veículos e Relatórios
+# Vexel — gestão de veículos e relatórios
 
-O VEXEL é um sistema composto por frontend em Angular, backend em Node.js/Express e integração com Firebase (Auth e Firestore).  
-Ele oferece gestão de veículos, geração de relatórios, autenticação segura e interface moderna.
+Aplicação full stack com **Angular e TypeScript**, **Node.js/Express** e **Firebase Auth/Firestore**. Reúne login, cadastro e consulta de veículos e relatórios da frota.
 
----
+## Funcionalidades
 
-## Arquitetura Geral
+- Login por e-mail e senha via Firebase Auth.
+- Rotas Angular protegidas e validação de ID token na API.
+- CRUD de veículos, com validação de dados no backend.
+- Paginação e filtros por marca e status.
+- Resumo da frota e indicadores de revisão.
+- Simulação de consumo: os valores são ilustrativos, não medições reais.
 
-Fluxo geral da aplicação:
+## Arquitetura
 
-1. O usuário acessa o frontend Angular.  
-2. Realiza login via Firebase Auth (email e senha).  
-3. O Angular envia requisições ao backend Express.  
-4. O backend valida o token com Firebase Admin.  
-5. Os dados são consultados/gravados no Firestore.  
-6. O frontend exibe as informações para o usuário.
+1. Angular autentica o usuário no Firebase Auth.
+2. O interceptor envia o ID token somente para a URL configurada da API.
+3. Express valida o token com Firebase Admin e verifica revogação.
+4. Os controllers consultam ou alteram a coleção `vehicles` no Firestore.
+5. A API retorna os dados ao frontend.
 
----
+O backend utiliza JavaScript; o frontend utiliza TypeScript. A autenticação é delegada ao Firebase, sem armazenamento de senhas pela API.
 
-# Frontend (Angular)
+## Executar localmente
 
-## Requisitos
+Use **Node.js 22.12 ou superior da linha 22**, npm e um projeto Firebase próprio. Configure Firestore e o provedor de login por e-mail/senha; crie um usuário de teste no Firebase Auth.
 
-- Node.js 18+  
-- NPM atualizado  
-- Angular CLI (opcional)  
-- Conta Firebase configurada
+```sh
+git clone https://github.com/lucaslusni/CBTDWEA---vexel.git
+cd CBTDWEA---vexel/vexel/backend
+npm install
+```
 
----
+Copie `.env.example` para `.env`. Configure `GOOGLE_APPLICATION_CREDENTIALS` com o caminho absoluto de uma credencial **nova**, armazenada fora do repositório. Ambientes com Application Default Credentials fornecidas pelo host podem omitir essa variável.
 
-## Configuração
+```sh
+npm run dev
+```
 
-1. Instale dependências  
-   `npm install`
+Em outro terminal, na pasta `vexel/frontend`:
 
-2. Execute em desenvolvimento  
-   `npm start`
+```sh
+npm install
+npm start
+```
 
-3. Acesse  
-   `http://localhost:4200`
+Configure seu Firebase em `src/environments/environment.ts`, incluindo `apiUrl` (padrão local: http://localhost:3001). A interface abre em http://localhost:4200.
 
-4. Configure a URL da API em  
-   `src/
+## Documentação
 
-3. Adicione o arquivo `serviceAccountKey.json` na raiz do backend.
+- [API, endpoints e configuração](vexel/backend/README.md)
+- [Frontend](vexel/frontend/README.md)
+- [Autenticação e tratamento de credenciais](docs/authentication.md)
+- [Tratamento de credenciais anteriormente versionadas](SECURITY.md)
 
-4. Execute em desenvolvimento  
-`npm run dev`
+## Verificação
 
-5. Execute em produção  
-`npm start`
+Na pasta `vexel/backend`, execute `npm test` para os testes do middleware, sem conexão ao Firebase.
 
-API disponível em:  
-`http://localhost:3001`
+Na pasta `vexel/frontend`, execute `node --experimental-strip-types --test test/api-url.test.mjs` para testar a restrição de destino do token, e `npm run build` para compilar o Angular.
 
----
+## Limitações atuais
 
-## Autenticação
+- Não há separação de acesso por proprietário ou papel: usuários autenticados compartilham a frota.
+- Consultas e relatórios realizam parte da filtragem/agregação em memória.
+- O cálculo de eficiência usa dados simulados.
+- A instalação em produção exige configuração de credenciais, HTTPS e revisão das permissões do projeto Firebase.
 
-As rotas protegidas exigem o header:
+O repositório não define uma licença de distribuição.
 
-`Authorization: Bearer <ID_TOKEN>`
-
-A validação é feita via Firebase Admin SDK.
-
----
-
-## Endpoints
-
-### Relatórios
-- GET /reports/public/summary  
-- GET /reports/summary  
-
-### Veículos
-- GET /vehicles  
-- GET /vehicles/:id  
-- POST /vehicles  
-- PUT /vehicles/:id  
-- DELETE /vehicles/:id  
-- GET /vehicles/check-up/all  
-- GET /vehicles/efficiency/all  
-
-### Healthcheck
-- GET /health
-
----
-
-## Estrutura do Backend
-
-- src/app.js – configuração do Express  
-- src/server.js – inicialização  
-- src/lib/firebase.js – integração Firebase Admin  
-- src/middlewares/auth.js – validação de token  
-- src/routes – rotas  
-- src/controllers – regras de negócio  
-
----
-
-# Integração Frontend ↔ Backend
-
-- Angular utiliza HttpClient para consumir a API  
-- O token é inserido automaticamente  
-- O backend valida o token  
-- O Firestore retorna os dados  
-- O frontend atualiza a visualização  
-
----
-
-# Dicas de Debug
-
-## Frontend
-- 401/403: token inválido  
-- 404: URL incorreta no environment  
-- 500: erro interno do backend  
-- Verificar a aba Network no DevTools  
-
-## Backend
-- Conferir logs no terminal  
-- Verificar `.env`  
-- Verificar chave Firebase  
-- Conferir permissões do Firestore  
-
----
-
-# Boas Práticas
-
-Não versionar:
-
-- node_modules  
-- .env  
-- serviceAccountKey.json  
-- dist/ ou build/  
-
-Utilizar .gitignore apropriado.
-
----
-
-# Licença
-
-Defina conforme necessidade do projeto.

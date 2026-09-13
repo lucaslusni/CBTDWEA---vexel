@@ -1,29 +1,21 @@
-﻿import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { from, switchMap } from 'rxjs';
 import { AuthService } from './services/auth.service';
+import { environment } from '../environments/environment';
+import { isApiUrl } from './api-url';
 
-// Interceptor de autenticação para anexar o token JWT (Firebase ID Token)
-// em todas as requisições HTTP feitas pelo HttpClient.
 export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
-  // Injeta o serviço de autenticação para conseguir pegar o ID token
-  const auth = inject(AuthService);
+  if (!isApiUrl(req.url, environment.apiUrl)) return next(req);
 
-  // getIdToken() retorna uma Promise, então usamos `from` para transformar em Observable
+  const auth = inject(AuthService);
   return from(auth.getIdToken()).pipe(
     switchMap(token => {
-      // Se não houver token (usuário não logado ou erro), segue a requisição original
       if (!token) return next(req);
-
-      // Clona a requisição original adicionando o cabeçalho Authorization: Bearer <token>
-      const authReq = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // Passa a nova requisição (com token) para o próximo interceptor / HttpHandler
-      return next(authReq);
+      return next(req.clone({
+        setHeaders: { Authorization: `Bearer ${token}` },
+      }));
     })
   );
 };
+

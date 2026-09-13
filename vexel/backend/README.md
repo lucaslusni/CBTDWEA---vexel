@@ -1,73 +1,69 @@
-# Vexel API (backend)
+# Vexel API
 
-API em Node.js/Express integrada ao Firebase (Firestore e Auth) para gestao de veiculos e relatorios.
+API Node.js/Express para gestão de veículos e relatórios, com Firebase Admin e Firestore.
 
-## Requisitos
-- Node 18+ e npm
-- Conta Firebase com chave de service account para Firestore/Auth
+## Configuração
 
-## Configuracao
-1) Instale dependencias:
-```
-npm install
-```
+1. Use Node.js 22.12 ou superior da linha 22 e execute `npm install`.
+2. Copie `.env.example` para `.env`.
+3. Configure `PORT` (padrão 3001).
+4. Configure `GOOGLE_APPLICATION_CREDENTIALS` com o caminho absoluto para uma nova chave de conta de serviço fora do repositório, ou utilize credenciais fornecidas pelo ambiente.
+5. Execute `npm run dev` ou `npm start`.
 
-2) Crie o arquivo `.env` (baseado no `.env.example`):
-```
-PORT=3001
-GOOGLE_APPLICATION_CREDENTIALS=./serviceAccountKey.json
-```
-
-3) Adicione a chave do Firebase:
-   - Gere uma chave JSON em Firebase Console -> Configuracoes do projeto -> Contas de servico -> Gerar nova chave privada.
-   - Salve como `serviceAccountKey.json` na raiz do backend (mesmo caminho apontado em `GOOGLE_APPLICATION_CREDENTIALS`).
-   - Nao versione este arquivo ou o `.env`.
-
-## Execucao
-- Desenvolvimento (hot reload):
-```
-npm run dev
-```
-- Producao/local simples:
-```
-npm start
-```
-O servidor sobe por padrao em `http://localhost:3001` (ajustavel via `PORT`).
-
-## Autenticacao
-- Rotas protegidas exigem header `Authorization: Bearer <ID_TOKEN>` validado pelo Firebase Auth.
-- Para obter um ID token de teste, edite `test-auth.js` com um usuario criado no Firebase Auth e execute:
-```
-node test-auth.js
-```
+O módulo Firebase carrega o `.env` e usa `applicationDefault()`; nenhuma chave privada deve estar no código ou nesta pasta.
 
 ## Endpoints
-- `GET /health` – checagem publica.
 
-**Relatorios**
-- `GET /reports/public/summary` – resumo sem auth (para teste rapido).
-- `GET /reports/summary` – resumo com auth. Retorna totais, medias e anos min/max.
+| Método e caminho | Acesso | Função |
+| --- | --- | --- |
+| `GET /health` | Público | Estado HTTP da aplicação; não testa o Firestore |
+| `GET /reports/summary` | Autenticado | Resumo da frota |
+| `GET /vehicles` | Autenticado | Lista com `page`, `pageSize`, `status` e `brand` |
+| `GET /vehicles/:id` | Autenticado | Consulta por identificador |
+| `POST /vehicles` | Autenticado | Cadastro |
+| `PUT /vehicles/:id` | Autenticado | Atualização parcial, sem alterar a placa |
+| `DELETE /vehicles/:id` | Autenticado | Exclusão |
+| `GET /vehicles/check-up/all` | Autenticado | Indicadores de revisão |
+| `GET /vehicles/efficiency/all` | Autenticado | Simulação de consumo |
 
-**Veiculos** (todas exigem auth)
-- `GET /vehicles` – lista paginada (`page`, `pageSize`, filtro `status`, `brand`).
-- `GET /vehicles/:id` – detalhe por ID (padrao usa a placa como ID).
-- `POST /vehicles` – cria veiculo. Body esperado:
+A antiga rota `/reports/public/summary` foi removida. Use `/reports/summary` com autenticação.
+
+Exemplo de cadastro:
+
 ```json
-{ "plate": "ABC1D23", "model": "Onix", "brand": "Chevrolet", "year": 2020, "status": "active", "mileage": 35120 }
+{
+  "plate": "ABC1D23",
+  "model": "Onix",
+  "brand": "Chevrolet",
+  "year": 2020,
+  "status": "active",
+  "mileage": 35120
+}
 ```
-- `PUT /vehicles/:id` – atualiza campos (exceto placa); aceita payload parcial.
-- `DELETE /vehicles/:id` – remove veiculo.
-- `GET /vehicles/check-up/all` – lista veiculos que precisam de revisao (mileage > 10.000 ou idade >= 1 ano).
-- `GET /vehicles/efficiency/all` – simula consumo medio e alerta de baixo consumo.
+
+## Autenticação
+
+Envie `Authorization: Bearer <ID_TOKEN>`. O middleware valida o token e verifica revogação usando Firebase Admin. Falhas retornam 401.
+
+Para obter um token localmente, configure `TEST_FIREBASE_API_KEY`, `TEST_AUTH_EMAIL` e `TEST_AUTH_PASSWORD` no `.env` e execute `node test-auth.js`. Use um usuário de teste do seu próprio projeto. O script imprime um ID token no terminal; não compartilhe essa saída nem a armazene no Git.
+
+## Testes
+
+```sh
+npm test
+```
+
+Os testes do middleware usam um verificador injetado e não acessam Firebase. Eles verificam cabeçalhos ausentes ou malformados, identidade validada, solicitação de checagem de revogação e rejeição de erros. A integração real depende de um projeto Firebase configurado.
 
 ## Estrutura
-- `src/app.js` – bootstrap Express, healthcheck e rotas.
-- `src/server.js` – inicializa servidor HTTP.
-- `src/lib/firebase.js` – configuracao Firebase Admin (Firestore/Auth).
-- `src/middlewares/auth.js` – valida ID token (Bearer).
-- `src/routes/*.routes.js` – definicao das rotas.
-- `src/controllers/*.controller.js` – regras de negocio e acesso ao Firestore.
 
-## Observacoes
-- O Firestore usa a collection `vehicles` (ID default = placa). Alguns endpoints fazem ordenacao/filtragem em memoria; para grandes volumes, considere indexes/queries.
-- Ha artefatos de ambiente (`node_modules`, `serviceAccountKey.json`, `.env`) que nao deveriam ser versionados; mantenha-os fora do controle de versao em futuros commits.
+- `src/app.js`: Express e montagem das rotas.
+- `src/lib/firebase.js`: credenciais do ambiente e serviços Firebase.
+- `src/middlewares/auth.js`: integração do middleware com Firebase.
+- `src/middlewares/auth-token.js`: validação do cabeçalho e tratamento de falhas.
+- `src/routes/`: endpoints.
+- `src/controllers/`: operações e relatórios.
+- `src/models/`: representação dos veículos.
+
+Leia também [autenticação](../../docs/authentication.md) e [credenciais expostas](../../SECURITY.md).
+

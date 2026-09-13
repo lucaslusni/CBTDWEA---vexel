@@ -1,0 +1,15 @@
+node_modules/
+.env
+.env.*
+!.env.example
+serviceAccountKey.json
+**/*service-account*.json
+dist/
+build/
+.angular/
+coverage/
+.vs/
+*.log
+.DS_Store
+Thumbs.db
+
