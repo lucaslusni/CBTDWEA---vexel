@@ -1,43 +1,37 @@
-﻿# VEXEL Frontend (Angular)
+# Vexel frontend
 
-Aplicação Angular com autenticação Firebase e comunicação com o backend Express.
+Interface Angular 20 com TypeScript para login, veículos e relatórios.
 
-## Como rodar
-1) Instale dependências: `npm install`
-2) Rode em dev: `npm start` (abre em `http://localhost:4200`)
-3) Se precisar, ajuste a API em `src/environments/environment.ts` (`apiUrl`, padrão `http://localhost:3001`).
+## Executar
+
+Use Node.js 22.12 ou superior da linha 22.
+
+```sh
+npm install
+npm start
+```
+
+Abra http://localhost:4200. A API deve estar em execução separadamente.
+
+Edite `src/environments/environment.ts` com a configuração web do seu projeto Firebase e a URL absoluta da API. `app.config.ts` utiliza essa configuração centralizada.
 
 ## Autenticação
-- Login via Firebase Auth (email/senha) em `/login`.
-- O `auth-token.interceptor.ts` injeta `Authorization: Bearer <ID token>` em todas as requisições HTTP.
-- `auth.guard.ts` protege `/vehicles` e `/reports`, aguardando a reidratação do usuário antes de redirecionar.
 
-## Rotas principais / navegação
-- Navbar no topo (app root) com links para `Veículos` e `Relatórios` e botão de sair.
-- `/login` — tela de login.
-- `/vehicles` — CRUD de veículos; consome `/vehicles` do backend (listar, criar, atualizar, apagar).
-- `/reports` — consome `/reports/summary` do backend e exibe métricas (total, ativos, médias).
+- `services/auth.service.ts`: login, logout e obtenção do ID token pelo SDK.
+- `guards/auth.guard.ts`: proteção das páginas de veículos e relatórios.
+- `auth-token.interceptor.ts`: envio do token à API.
+- `api-url.ts`: comparação de origem e caminho para evitar o envio do token a outros destinos.
 
-## Services / chamadas à API
-- `src/app/services/vehicles.service.ts`
-  - `list({ page, pageSize, status, brand })` → GET `/vehicles` (retorna paginação: `{ items, count, page, pageSize }`; também aceita array se backend antigo).
-  - `get(id)` → GET `/vehicles/:id`
-  - `create(payload)` → POST `/vehicles`
-  - `update(id, payload)` → PUT `/vehicles/:id`
-  - `remove(id)` → DELETE `/vehicles/:id`
-- `src/app/services/reports.service.ts`
-  - `summary()` → GET `/reports/summary`
+A configuração web Firebase é entregue ao navegador. Nunca inclua uma chave privada de conta de serviço nela.
 
-## Páginas e UI
-- `vehicles` (`src/app/pages/vehicles/`): formulário de criação, edição inline na tabela, exclusão, paginação básica; tema verde futurista.
-- `reports` (`src/app/pages/reports/`): cartões de métricas do resumo.
-- `login` (`src/app/pages/login/`): tela de login com badge VEXEL.
+## Compilar e verificar
 
-## Estilo / tema
-- Tema neon/verde nos `.scss` de cada página (gradientes, cards translúcidos, botões). Ajuste variáveis no topo dos `.scss` conforme o gosto.
+```sh
+npm run build
+node --experimental-strip-types --test test/api-url.test.mjs
+```
 
-## Dicas de debug
-- DevTools (Network) para checar chamadas HTTP.
-- 401/403: refaça login; backend exige Bearer.
-- 404: confira `apiUrl` e paths.
-- 500: veja log do backend.
+O teste de URL usa o executor nativo do Node.js. Os testes Angular existentes podem ser executados com `npm test` e precisam de um navegador compatível com o Karma configurado no projeto.
+
+Leia o [fluxo de autenticação completo](../../docs/authentication.md).
+

@@ -1,45 +1,27 @@
-// test-auth.js
+import "dotenv/config";
+import { initializeApp, deleteApp } from "firebase/app";
+import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
-// Importa a função para inicializar o app Firebase
-import { initializeApp } from "firebase/app";
+const apiKey = process.env.TEST_FIREBASE_API_KEY;
+const email = process.env.TEST_AUTH_EMAIL;
+const password = process.env.TEST_AUTH_PASSWORD;
 
-// Importa funções de autenticação: getAuth para pegar o objeto de auth
-// e signInWithEmailAndPassword para fazer login com email e senha
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+if (!apiKey || !email || !password) {
+  console.error("Configure TEST_FIREBASE_API_KEY, TEST_AUTH_EMAIL e TEST_AUTH_PASSWORD no .env local.");
+  process.exitCode = 1;
+} else {
+  const app = initializeApp({ apiKey });
+  const auth = getAuth(app);
+  try {
+    const credential = await signInWithEmailAndPassword(auth, email, password);
+    // Local helper only: stdout contains a bearer credential. Do not share it.
+    console.log(await credential.user.getIdToken());
+  } catch {
+    console.error("Nao foi possivel autenticar. Confira a configuracao e o usuario de teste.");
+    process.exitCode = 1;
+  } finally {
+    await signOut(auth).catch(() => {});
+    await deleteApp(app);
+  }
+}
 
-// Configuração do Firebase do seu projeto
-// ⚠️ Em projeto real, evite deixar isso público em repositórios sem necessidade
-const firebaseConfig = {
-    apiKey: "AIzaSyB2WuYZ9gc4wCQfWyzjMgp-YCn-K-1oJmo",
-    authDomain: "vexel-api.firebaseapp.com",
-    projectId: "vexel-api",
-    storageBucket: "vexel-api.firebasestorage.app",
-    messagingSenderId: "1037237354319",
-    appId: "1:1037237354319:web:57502ab8a4f3110001cf3a",
-};
-
-// Inicializa o app Firebase com as configurações acima
-const app = initializeApp(firebaseConfig);
-
-// Pega a instância do serviço de autenticação (Auth) a partir do app
-const auth = getAuth(app);
-
-// 👇 Altere para um usuário real que exista no Firebase Authentication
-// Esses dados são apenas para teste local
-const email = "admin@empresa.com";
-const password = "123456";
-
-// Faz login com email e senha usando o Firebase Auth
-signInWithEmailAndPassword(auth, email, password)
-    // Se der certo, cai no .then()
-    .then(async(userCred) => {
-        // userCred contém informações do usuário autenticado
-        // Aqui pegamos o ID Token JWT do usuário logado
-        const token = await userCred.user.getIdToken();
-
-        // Mostra o token no console bonitinho
-        console.log("\n✅ Seu ID Token:\n");
-        console.log(token);
-    })
-    // Se der erro (usuário não existe, senha errada, config errada...), cai aqui
-    .catch(console.error);

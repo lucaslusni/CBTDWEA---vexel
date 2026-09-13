@@ -1,14 +1,12 @@
+import "dotenv/config";
 import admin from "firebase-admin";
-import { readFileSync } from "fs";
 
-const serviceAccount = JSON.parse(
-  readFileSync(new URL("../../serviceAccountKey.json", import.meta.url))
-);
-
-// Inicializa admin SDK apenas uma vez, usando service account local
+// Uses Application Default Credentials: an external key path supplied through
+// GOOGLE_APPLICATION_CREDENTIALS, or credentials provided by the host.
 if (!admin.apps.length) {
-  admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+  admin.initializeApp({ credential: admin.credential.applicationDefault() });
 }
 
-export const db = admin.firestore(); // acesso ao Firestore
-export const authAdmin = admin.auth(); // verificação de tokens do Firebase Auth
+export const db = admin.firestore();
+export const authAdmin = admin.auth();
+

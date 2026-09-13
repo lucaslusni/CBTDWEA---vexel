@@ -1,1 +1,2 @@
-/* You can add global styles to this file, and also import other style files */
+/* Fonts are global assets, not component-scoped styles. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
